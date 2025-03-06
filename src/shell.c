@@ -1,4 +1,5 @@
 #include "neo.h"
+#include <ion.h>
 
 neo_shell_t *neo_shell_new() {
   neo_shell_t *self;
@@ -41,11 +42,11 @@ neo_result_code_t neo_shell_run_cycle(neo_shell_t *self) {
   if (self == NULL)
     return RESULT_NULL;
 
-  result = neo_shell_io_push_prompt(self);
+  result = neo_shell_io_pull_input(self);
   if (result != RESULT_OK)
     return result;
 
-  result = neo_shell_io_pull_input(self);
+  result = neo_shell_process_input(self);
   if (result != RESULT_OK)
     return result;
 

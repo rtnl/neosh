@@ -31,6 +31,10 @@ neo_result_code_t neo_shell_io_pull_input(neo_shell_t *self) {
 
   flag = 1;
 
+  result = neo_shell_io_push_prompt(self);
+  if (result != RESULT_OK)
+    return result;
+
   while (flag) {
     memset(buffer, 0x00, BUFFER_SIZE);
 
@@ -59,17 +63,15 @@ neo_result_code_t neo_shell_io_pull_input(neo_shell_t *self) {
         result = ion_buffer_io_write_arr_close(self->state->input_buffer);
         if (result != RESULT_OK)
           return result;
-      }
 
-      uint8_t *d;
-      size_t len;
-      d = ion_buffer_consume(ion_buffer_clone(self->state->input_buffer), &len);
-      for (size_t x = 0; x < len; x++) {
-        printf("d[%02lX]->[%02X]\n", x, d[x]);
-      }
-      free(d);
+        flag = 0;
+      } else {
+        result = neo_shell_io_push_prompt(self);
+        if (result != RESULT_OK)
+          return result;
 
-      flag = 0;
+        flag = 1;
+      }
       break;
     }
     }

@@ -40,4 +40,7 @@ void neo_shell_state_free(neo_shell_state_t *self);
 neo_result_code_t neo_shell_io_push_prompt(neo_shell_t *self);
 neo_result_code_t neo_shell_io_pull_input(neo_shell_t *self);
 
+// shell_process.c
+neo_result_code_t neo_shell_process_input(neo_shell_t *self);
+
 #endif
