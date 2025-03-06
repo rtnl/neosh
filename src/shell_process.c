@@ -4,6 +4,7 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
   neo_result_code_t result;
   neo_shell_state_t *state;
   uint8_t *input;
+  uint8_t **input_split;
   t_ion_object_kind kind;
   uint8_t len;
 
@@ -56,7 +57,15 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
     return result;
   }
 
-  printf("input->[%s]\n", input);
+  input_split = str_split(input, (uint8_t *)" ");
+  if (input_split == NULL)
+    return RESULT_ERROR;
+
+  for (size_t x = 0; input_split[x]; x++) {
+    printf("\tinput_split: [%04lX]->[%s]\n", x, input_split[x]);
+    free(input_split[x]);
+  }
+  free(input_split);
 
   free(input);
   return RESULT_OK;

@@ -26,6 +26,9 @@ typedef struct neo_shell_s {
     neo_shell_state_t *state;
 } neo_shell_t;
 
+// split.c
+uint8_t **str_split(uint8_t *str, uint8_t *separators);
+
 // shell.c
 neo_shell_t *neo_shell_new();
 void neo_shell_free(neo_shell_t *self);
