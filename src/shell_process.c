@@ -91,15 +91,9 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
 
     if (path_list[x]->flag_valid == 1) {
       path_choice = path_list[x];
-      break;
+    } else {
+      neo_shell_path_entry_free(path_list[x]);
     }
-  }
-
-  for (x = 0; path_list[x]; x++) {
-    if (path_list[x] == path_choice)
-      continue;
-
-    neo_shell_path_entry_free(path_list[x]);
   }
 
   free(path_list);
