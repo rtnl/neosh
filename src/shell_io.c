@@ -8,6 +8,8 @@ void push_string(int fd, uint8_t *value) {
 
 void push_string_stdout(uint8_t *value) { push_string(STDOUT_FILENO, value); }
 
+void push_string_stderr(uint8_t *value) { push_string(STDERR_FILENO, value); }
+
 neo_result_code_t neo_shell_io_push_prompt(neo_shell_t *self) {
   if (self == NULL)
     return RESULT_NULL;
