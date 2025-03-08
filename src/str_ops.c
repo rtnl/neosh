@@ -148,3 +148,15 @@ uint8_t *str_join(uint8_t **value, uint8_t *separator) {
 
   return vector_consume(vector);
 }
+
+void str_list_free(uint8_t **l) {
+  size_t x;
+
+  if (l == NULL)
+    return;
+
+  for (x = 0; l[x]; x++)
+    free(l[x]);
+
+  free(l);
+}

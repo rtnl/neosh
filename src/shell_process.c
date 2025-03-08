@@ -74,14 +74,20 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
   exec_list = NULL;
 
   result = neo_shell_derive_exec(self, input_split, &exec_list);
-  if (result != RESULT_OK)
+  if (result != RESULT_OK) {
+    str_list_free(input_split);
     return result;
+  }
 
-  if (exec_list == NULL)
+  if (exec_list == NULL) {
     return RESULT_NULL;
+    str_list_free(input_split);
+  }
 
-  if (exec_list[0] == NULL)
+  if (exec_list[0] == NULL) {
+    str_list_free(input_split);
     return RESULT_OK;
+  }
 
   exec_choice = NULL;
   exec_list_len = 0;
@@ -92,6 +98,7 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
   for (x = 0; x < exec_list_len; x++) {
     result = neo_shell_validate_exec(self, exec_list[x]);
     if (result != RESULT_OK) {
+      str_list_free(input_split);
       return result;
     }
 
@@ -106,6 +113,7 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
 
   if (exec_choice == NULL) {
     push_string_stderr((uint8_t *)"error: no valid path found\n");
+    str_list_free(input_split);
     free(exec_list);
     free(input);
     return RESULT_OK;
@@ -113,6 +121,7 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
 
   result = neo_shell_process_execute(self, exec_choice);
   if (result != RESULT_OK) {
+    str_list_free(input_split);
     free(exec_list);
     free(input);
     return result;
@@ -125,6 +134,7 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
     neo_shell_exec_entry_free(exec_list[x]);
   }
 
+  str_list_free(input_split);
   free(exec_list);
   free(input);
   return RESULT_OK;
@@ -135,6 +145,8 @@ neo_result_code_t neo_shell_process_execute(neo_shell_t *self,
   uint8_t *path_final;
   int status;
   pid_t pid;
+  uint8_t **args;
+  size_t x;
 
   if (self == NULL)
     return RESULT_NULL;
@@ -151,19 +163,21 @@ neo_result_code_t neo_shell_process_execute(neo_shell_t *self,
   }
   if (pid == 0) {
     path_final = str_dup(exec->path, str_len(exec->path));
+
+    for (x = 0; exec->args[x]; x++)
+      ;
+    args = (uint8_t **)calloc(x + 1, sizeof(uint8_t *));
+    for (x = 0; exec->args[x]; x++)
+      args[x] = str_dup(exec->args[x], str_len(exec->args[x]));
+    args[x] = NULL;
+
     neo_shell_exec_entry_free(exec);
 
     if (path_final == NULL)
       return RESULT_NULL;
 
-    char *args[] = {
-        (char *)str_dup(path_final, str_len(path_final)),
-        NULL,
-    };
-
-    char **envp = (char **)neo_shell_env_export(self);
-
-    if (execve((char *)path_final, args, envp) == -1) {
+    if (execve((char *)path_final, (char **)args,
+               (char **)neo_shell_env_export(self)) == -1) {
       return RESULT_ERROR;
     }
   } else {
