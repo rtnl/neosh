@@ -30,6 +30,7 @@ typedef struct neo_map_s {
 
 typedef struct neo_shell_state_s {
     t_ion_buffer *input_buffer;
+    neo_map_t *env;
 } neo_shell_state_t;
 
 typedef struct neo_shell_s {
@@ -63,7 +64,7 @@ neo_result_code_t neo_map_get(neo_map_t *self, uint8_t *key, void *dst, size_t l
 neo_result_code_t neo_map_drop(neo_map_t *self, uint8_t *key);
 
 // shell.c
-neo_shell_t *neo_shell_new();
+neo_shell_t *neo_shell_new(int32_t argc, uint8_t **argv, uint8_t **envp);
 void neo_shell_free(neo_shell_t *self);
 neo_result_code_t neo_shell_run(neo_shell_t *self);
 neo_result_code_t neo_shell_run_cycle(neo_shell_t *self);
@@ -71,6 +72,10 @@ neo_result_code_t neo_shell_run_cycle(neo_shell_t *self);
 // shell_state.c
 neo_shell_state_t *neo_shell_state_new();
 void neo_shell_state_free(neo_shell_state_t *self);
+
+// shell_env.c
+neo_result_code_t neo_shell_env_add(neo_shell_t *self, uint8_t *key, uint8_t *value);
+neo_result_code_t neo_shell_env_remove(neo_shell_t *self, uint8_t *key);
 
 // shell_io.c
 void push_string(int fd, uint8_t *value);
