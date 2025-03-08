@@ -59,6 +59,7 @@ neo_result_code_t neo_shell_env_remove(neo_shell_t *self, uint8_t *key) {
 uint8_t **neo_shell_env_export(neo_shell_t *self) {
   neo_result_code_t result;
   uint8_t **output;
+  size_t output_len;
   t_ion_vector *output_buffer;
   neo_shell_state_t *state;
   neo_map_t *env;
@@ -89,7 +90,10 @@ uint8_t **neo_shell_env_export(neo_shell_t *self) {
     return NULL;
   }
 
-  output = calloc(env_key_list->curr_w, sizeof(uint8_t *));
+  output_len = env_key_list->curr_w + 1;
+  output = calloc(output_len, sizeof(uint8_t *));
+  output[output_len - 1] = NULL;
+
   y = 0;
   for (x = 0; x < env_key_list->curr_w; x++) {
     env_key_ref = NULL;
