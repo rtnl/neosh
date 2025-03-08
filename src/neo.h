@@ -41,10 +41,10 @@ typedef struct neo_shell_s {
     neo_shell_state_t *state;
 } neo_shell_t;
 
-typedef struct neo_shell_path_entry_s {
+typedef struct neo_shell_exec_entry_s {
     uint8_t flag_valid;
     uint8_t *path;
-} neo_shell_path_entry_t;
+} neo_shell_exec_entry_t;
 
 // str_ops.c
 size_t str_len(uint8_t *str);
@@ -92,12 +92,12 @@ neo_result_code_t neo_shell_io_pull_input(neo_shell_t *self);
 
 // shell_process.c
 neo_result_code_t neo_shell_process_input(neo_shell_t *self);
-neo_result_code_t neo_shell_process_execute(neo_shell_t *self, neo_shell_path_entry_t *path);
+neo_result_code_t neo_shell_process_execute(neo_shell_t *self, neo_shell_exec_entry_t *path);
 
-// shell_path.c
-neo_shell_path_entry_t *neo_shell_path_entry_new(uint8_t *path);
-void neo_shell_path_entry_free(neo_shell_path_entry_t *self);
-neo_result_code_t neo_shell_derive_path(neo_shell_t *self, uint8_t **input_split, neo_shell_path_entry_t ***entry_list_ref);
-neo_result_code_t neo_shell_validate_path(neo_shell_t *self, neo_shell_path_entry_t *path_entry);
+// shell_exec.c
+neo_shell_exec_entry_t *neo_shell_exec_entry_new(uint8_t *path);
+void neo_shell_exec_entry_free(neo_shell_exec_entry_t *self);
+neo_result_code_t neo_shell_derive_exec(neo_shell_t *self, uint8_t **input_split, neo_shell_exec_entry_t ***entry_list_ref);
+neo_result_code_t neo_shell_validate_exec(neo_shell_t *self, neo_shell_exec_entry_t *path_entry);
 
 #endif

@@ -148,16 +148,3 @@ uint8_t *str_join(uint8_t **value, uint8_t *separator) {
 
   return vector_consume(vector);
 }
-
-neo_result_code_t neo_shell_validate_path(neo_shell_t *self,
-                                          neo_shell_path_entry_t *path_entry) {
-  if (self == NULL)
-    return RESULT_NULL;
-
-  if (path_entry == NULL)
-    return RESULT_NULL;
-
-  path_entry->flag_valid = access((char *)path_entry->path, X_OK) == 0;
-
-  return RESULT_OK;
-}

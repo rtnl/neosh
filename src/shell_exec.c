@@ -1,19 +1,19 @@
 #include "neo.h"
 
-neo_shell_path_entry_t *neo_shell_path_entry_new(uint8_t *path) {
-  neo_shell_path_entry_t *self;
+neo_shell_exec_entry_t *neo_shell_exec_entry_new(uint8_t *path) {
+  neo_shell_exec_entry_t *self;
 
   if (path == NULL)
     return NULL;
 
-  self = (neo_shell_path_entry_t *)calloc(1, sizeof(neo_shell_path_entry_t));
+  self = (neo_shell_exec_entry_t *)calloc(1, sizeof(neo_shell_exec_entry_t));
   self->flag_valid = 0;
   self->path = path;
 
   return self;
 }
 
-void neo_shell_path_entry_free(neo_shell_path_entry_t *self) {
+void neo_shell_exec_entry_free(neo_shell_exec_entry_t *self) {
   if (self == NULL)
     return;
 
@@ -23,15 +23,13 @@ void neo_shell_path_entry_free(neo_shell_path_entry_t *self) {
   free(self);
 }
 
-void neo_shell_path_entry_free(neo_shell_path_entry_t *self);
-
 neo_result_code_t
-neo_shell_derive_path(neo_shell_t *self, uint8_t **input_split,
-                      neo_shell_path_entry_t ***entry_list_ref) {
+neo_shell_derive_exec(neo_shell_t *self, uint8_t **input_split,
+                      neo_shell_exec_entry_t ***entry_list_ref) {
   neo_result_code_t result;
   neo_shell_state_t *state;
   size_t input_split_len;
-  neo_shell_path_entry_t **entry_list;
+  neo_shell_exec_entry_t **entry_list;
   size_t entry_list_len;
   uint8_t **path_list;
   size_t path_list_len;
@@ -72,8 +70,8 @@ neo_shell_derive_path(neo_shell_t *self, uint8_t **input_split,
   }
 
   entry_list_len = path_list_len + 3;
-  entry_list = (neo_shell_path_entry_t **)calloc(
-      entry_list_len, sizeof(neo_shell_path_entry_t *));
+  entry_list = (neo_shell_exec_entry_t **)calloc(
+      entry_list_len, sizeof(neo_shell_exec_entry_t *));
   for (x = 0; path_list[x]; x++) {
     path_vector = vector_new(sizeof(uint8_t));
 
@@ -89,14 +87,14 @@ neo_shell_derive_path(neo_shell_t *self, uint8_t **input_split,
     if (result != RESULT_OK)
       return result;
 
-    entry_list[2 + x] = neo_shell_path_entry_new(vector_consume(path_vector));
+    entry_list[2 + x] = neo_shell_exec_entry_new(vector_consume(path_vector));
   }
 
   // Todo: resolve relative path
   entry_list[0] =
-      neo_shell_path_entry_new(str_dup(input_head, str_len(input_head)));
+      neo_shell_exec_entry_new(str_dup(input_head, str_len(input_head)));
   entry_list[1] =
-      neo_shell_path_entry_new(str_dup(input_head, str_len(input_head)));
+      neo_shell_exec_entry_new(str_dup(input_head, str_len(input_head)));
 
   entry_list[entry_list_len - 1] = NULL;
 
@@ -107,5 +105,18 @@ neo_shell_derive_path(neo_shell_t *self, uint8_t **input_split,
   }
   free(input_split);
   free(path_list);
+  return RESULT_OK;
+}
+
+neo_result_code_t neo_shell_validate_exec(neo_shell_t *self,
+                                          neo_shell_exec_entry_t *exec) {
+  if (self == NULL)
+    return RESULT_NULL;
+
+  if (exec == NULL)
+    return RESULT_NULL;
+
+  exec->flag_valid = access((char *)exec->path, X_OK) == 0;
+
   return RESULT_OK;
 }
