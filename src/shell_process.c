@@ -6,6 +6,7 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
   uint8_t *input;
   uint8_t **input_split;
   neo_shell_path_entry_t **path_list;
+  size_t path_list_len;
   neo_shell_path_entry_t *path_choice;
   t_ion_object_kind kind;
   uint8_t len;
@@ -83,7 +84,12 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
     return RESULT_OK;
 
   path_choice = NULL;
+  path_list_len = 0;
   for (x = 0; path_list[x]; x++) {
+    path_list_len++;
+  }
+
+  for (x = 0; x < path_list_len; x++) {
     result = neo_shell_validate_path(self, path_list[x]);
     if (result != RESULT_OK) {
       return result;
@@ -93,22 +99,32 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
       path_choice = path_list[x];
     } else {
       neo_shell_path_entry_free(path_list[x]);
+      path_list[x] = NULL;
     }
   }
 
-  free(path_list);
-
   if (path_choice == NULL) {
-    push_string_stdout((uint8_t *)"error: no valid path found\n");
+    push_string_stderr((uint8_t *)"error: no valid path found\n");
+    free(path_list);
     free(input);
     return RESULT_OK;
   }
 
   result = neo_shell_process_execute(self, path_choice);
   if (result != RESULT_OK) {
+    free(path_list);
+    free(input);
     return result;
   }
 
+  for (x = 0; x < path_list_len; x++) {
+    if (path_list[x] == NULL)
+      continue;
+
+    neo_shell_path_entry_free(path_list[x]);
+  }
+
+  free(path_list);
   free(input);
   return RESULT_OK;
 }
@@ -153,6 +169,5 @@ neo_result_code_t neo_shell_process_execute(neo_shell_t *self,
     waitpid(pid, &status, 0);
   }
 
-  neo_shell_path_entry_free(path);
   return RESULT_OK;
 }
