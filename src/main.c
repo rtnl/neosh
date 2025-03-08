@@ -1,5 +1,7 @@
 #include "neo.h"
 
+#ifndef TEST
+
 int main() {
   neo_shell_t *shell;
 
@@ -10,3 +12,5 @@ int main() {
 
   return 0;
 }
+
+#endif
