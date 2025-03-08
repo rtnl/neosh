@@ -144,9 +144,7 @@ neo_result_code_t neo_shell_process_execute(neo_shell_t *self,
         NULL,
     };
 
-    char *envp[] = {
-        NULL,
-    };
+    char **envp = (char **)neo_shell_env_export(self);
 
     if (execve((char *)path_final, args, envp) == -1) {
       return RESULT_ERROR;

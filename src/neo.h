@@ -21,7 +21,9 @@ typedef t_ion_result_code neo_result_code_t;
 typedef struct nen_map_entry_s {
     uint8_t flag_active;
     uint64_t hash;
+    uint8_t *key;
     void *data;
+    size_t data_size;
 } neo_map_entry_t;
 
 typedef struct neo_map_s {
@@ -53,15 +55,18 @@ uint8_t **str_split(uint8_t *str, uint8_t *separators);
 uint8_t *str_join(uint8_t **value, uint8_t *separator);
 
 // map.c
-neo_map_entry_t *neo_map_entry_new(uint64_t hash, void *data);
+neo_map_entry_t *neo_map_entry_new(uint64_t hash, uint8_t *key, void *data, size_t data_size);
 void neo_map_entry_free(neo_map_entry_t *self);
-neo_result_code_t neo_map_entry_update(neo_map_entry_t *self, uint64_t hash, void *data);
+neo_result_code_t neo_map_entry_update(neo_map_entry_t *self, uint64_t hash, uint8_t *key, void *data, size_t data_size);
 neo_map_t *neo_map_new();
 void neo_map_free(neo_map_t *self);
 uint64_t neo_map_hash(neo_map_t *self, uint8_t *key, size_t len);
+neo_result_code_t neo_map_get_entry(neo_map_t *self, uint8_t *key, neo_map_entry_t **value);
 neo_result_code_t neo_map_insert(neo_map_t *self, uint8_t *key, void *src, size_t len);
 neo_result_code_t neo_map_get(neo_map_t *self, uint8_t *key, void *dst, size_t len);
 neo_result_code_t neo_map_drop(neo_map_t *self, uint8_t *key);
+neo_result_code_t neo_map_list_key(neo_map_t *self, t_ion_vector *output);
+neo_result_code_t neo_map_pull(neo_map_t *self, uint8_t *key, t_ion_vector *output);
 
 // shell.c
 neo_shell_t *neo_shell_new(int32_t argc, uint8_t **argv, uint8_t **envp);
@@ -76,6 +81,7 @@ void neo_shell_state_free(neo_shell_state_t *self);
 // shell_env.c
 neo_result_code_t neo_shell_env_add(neo_shell_t *self, uint8_t *key, uint8_t *value);
 neo_result_code_t neo_shell_env_remove(neo_shell_t *self, uint8_t *key);
+uint8_t **neo_shell_env_export(neo_shell_t *self);
 
 // shell_io.c
 void push_string(int fd, uint8_t *value);
