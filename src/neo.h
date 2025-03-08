@@ -52,12 +52,15 @@ uint8_t **str_split(uint8_t *str, uint8_t *separators);
 uint8_t *str_join(uint8_t **value, uint8_t *separator);
 
 // map.c
+neo_map_entry_t *neo_map_entry_new(uint64_t hash, void *data);
+void neo_map_entry_free(neo_map_entry_t *self);
+neo_result_code_t neo_map_entry_update(neo_map_entry_t *self, uint64_t hash, void *data);
 neo_map_t *neo_map_new();
 void neo_map_free(neo_map_t *self);
+uint64_t neo_map_hash(neo_map_t *self, uint8_t *key, size_t len);
 neo_result_code_t neo_map_insert(neo_map_t *self, uint8_t *key, void *src, size_t len);
 neo_result_code_t neo_map_get(neo_map_t *self, uint8_t *key, void *dst, size_t len);
-neo_map_entry_t *neo_map_entry_new(uint64_t hash, void *data);
-neo_result_code_t neo_map_entry_update(neo_map_entry_t *self, uint64_t hash, void *data);
+neo_result_code_t neo_map_drop(neo_map_t *self, uint8_t *key);
 
 // shell.c
 neo_shell_t *neo_shell_new();
