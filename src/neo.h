@@ -52,9 +52,12 @@ size_t str_len(uint8_t *str);
 uint8_t str_char(uint8_t *str, uint8_t c);
 uint8_t *str_cat(uint8_t *str_a, uint8_t *str_b);
 uint8_t *str_dup(uint8_t *str, size_t len);
+uint8_t *str_dup_len(uint8_t *str);
 uint8_t **str_split(uint8_t *str, uint8_t *separators);
 uint8_t *str_join(uint8_t **value, uint8_t *separator);
 void str_list_free(uint8_t **l);
+uint8_t **str_list_append(uint8_t **l, uint8_t *s);
+uint8_t **str_list_insert(uint8_t **l, uint8_t *s);
 
 // map.c
 neo_map_entry_t *neo_map_entry_new(uint64_t hash, uint8_t *key, void *data, size_t data_size);
@@ -83,6 +86,7 @@ void neo_shell_state_free(neo_shell_state_t *self);
 // shell_env.c
 neo_result_code_t neo_shell_env_add(neo_shell_t *self, uint8_t *key, uint8_t *value);
 neo_result_code_t neo_shell_env_remove(neo_shell_t *self, uint8_t *key);
+neo_result_code_t neo_shell_env_pull(neo_shell_t *self, uint8_t *key, t_ion_vector *output);
 uint8_t **neo_shell_env_export(neo_shell_t *self);
 
 // shell_io.c

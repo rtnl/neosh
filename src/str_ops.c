@@ -69,6 +69,8 @@ uint8_t *str_dup(uint8_t *str, size_t len) {
   return r;
 }
 
+uint8_t *str_dup_len(uint8_t *str) { return str_dup(str, str_len(str)); }
+
 uint8_t **str_split(uint8_t *str, uint8_t *separators) {
   uint8_t **r;
   uint8_t *s;
@@ -159,4 +161,60 @@ void str_list_free(uint8_t **l) {
     free(l[x]);
 
   free(l);
+}
+
+uint8_t **str_list_append(uint8_t **l, uint8_t *s) {
+  uint8_t **r;
+  size_t len;
+  size_t x;
+
+  if (l == NULL)
+    return NULL;
+
+  for (x = 0; l[x]; x++)
+    ;
+
+  len = x + 2;
+
+  r = (uint8_t **)calloc(len, sizeof(uint8_t *));
+  if (r == NULL) {
+    free(l);
+    return NULL;
+  }
+
+  for (x = 0; l[x]; x++)
+    r[x] = l[x];
+
+  r[x++] = str_dup(s, str_len(s));
+  r[x++] = NULL;
+
+  free(l);
+  return r;
+}
+
+uint8_t **str_list_insert(uint8_t **l, uint8_t *s) {
+  uint8_t **r;
+  size_t x;
+
+  if (l == NULL)
+    return NULL;
+
+  for (x = 0; l[x]; x++)
+    ;
+
+  r = (uint8_t **)calloc(x + 1 + 1, sizeof(uint8_t *));
+  if (r == NULL) {
+    free(l);
+    return NULL;
+  }
+
+  r[x++] = str_dup(s, str_len(s));
+
+  for (x = 0; l[x]; x++)
+    r[x] = l[x - 1];
+
+  r[x] = NULL;
+
+  free(l);
+  return r;
 }

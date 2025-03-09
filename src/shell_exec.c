@@ -50,6 +50,8 @@ neo_shell_derive_exec(neo_shell_t *self, uint8_t **input_split,
   size_t input_split_len;
   neo_shell_exec_entry_t **entry_list;
   size_t entry_list_len;
+  t_ion_vector *path_env_vector;
+  uint8_t *path_env;
   uint8_t **path_list;
   size_t path_list_len;
   t_ion_vector *path_vector;
@@ -69,22 +71,40 @@ neo_shell_derive_exec(neo_shell_t *self, uint8_t **input_split,
   if (state == NULL)
     return RESULT_NULL;
 
-  path_list_len = 7;
-  path_list = (uint8_t **)calloc(path_list_len, sizeof(uint8_t *));
-  path_list[0] = (uint8_t *)"/bin";
-  path_list[1] = (uint8_t *)"/sbin";
-  path_list[2] = (uint8_t *)"/usr/bin";
-  path_list[3] = (uint8_t *)"/usr/sbin";
-  path_list[4] = (uint8_t *)"/usr/local/bin";
-  path_list[5] = (uint8_t *)"/usr/local/sbin";
-  path_list[path_list_len - 1] = NULL;
+  path_env_vector = vector_new(sizeof(uint8_t));
+  result = neo_shell_env_pull(self, (uint8_t *)"PATH", path_env_vector);
+  if (result != RESULT_OK)
+    return result;
+
+  path_env = vector_consume(path_env_vector);
+  if (path_env == NULL)
+    return RESULT_NULL;
+
+  path_list = str_split(path_env, (uint8_t *)":");
+  if (path_list == NULL)
+    return RESULT_NULL;
+
+  free(path_env);
+
+  if (path_list[0] == NULL) {
+    path_list = str_list_append(path_list, (uint8_t *)"/bin");
+    path_list = str_list_append(path_list, (uint8_t *)"/sbin");
+    path_list = str_list_append(path_list, (uint8_t *)"/usr/bin");
+    path_list = str_list_append(path_list, (uint8_t *)"/usr/sbin");
+    path_list = str_list_append(path_list, (uint8_t *)"/usr/local/bin");
+    path_list = str_list_append(path_list, (uint8_t *)"/usr/local/sbin");
+  }
+
+  path_list_len = 0;
+  for (x = 0; path_list[x]; x++)
+    path_list_len++;
 
   for (input_split_len = 0; input_split[input_split_len]; input_split_len++)
     ;
 
   input_head = input_split[0];
   if (input_head == NULL) {
-    free(path_list);
+    str_list_free(path_list);
     return RESULT_NULL;
   }
 
@@ -120,7 +140,7 @@ neo_shell_derive_exec(neo_shell_t *self, uint8_t **input_split,
 
   *entry_list_ref = entry_list;
 
-  free(path_list);
+  str_list_free(path_list);
   return RESULT_OK;
 }
 
