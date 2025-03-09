@@ -13,7 +13,7 @@ neosh offers a coherent, deterministic and intuitive experience with features li
     - [ ] signal handling
   - [ ] PATH support
     - [X] hardcoded PATH values
-    - [ ] use env
+    - [X] use env
     - [ ] relative file paths
   - [ ] env support
     - [X] load env on start
