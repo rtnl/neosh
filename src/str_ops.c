@@ -148,7 +148,9 @@ uint8_t *str_join(uint8_t **value, uint8_t *separator) {
       break;
   }
 
-  return vector_consume(vector);
+  vector_write(vector, (uint8_t *)"", 1);
+
+  return (uint8_t *)vector_consume(vector);
 }
 
 void str_list_free(uint8_t **l) {

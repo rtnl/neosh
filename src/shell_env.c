@@ -83,7 +83,7 @@ neo_result_code_t neo_shell_env_pull(neo_shell_t *self, uint8_t *key,
   if (result != RESULT_OK)
     return result;
 
-  result = vector_write(output, "\0", 1);
+  result = vector_write(output, (uint8_t *)"", 1);
   if (result != RESULT_OK)
     return result;
 
@@ -125,7 +125,7 @@ uint8_t **neo_shell_env_export(neo_shell_t *self) {
   }
 
   output_len = env_key_list->curr_w + 1;
-  output = calloc(output_len, sizeof(uint8_t *));
+  output = (uint8_t **)calloc(output_len, sizeof(uint8_t *));
   output[output_len - 1] = NULL;
 
   y = 0;
@@ -155,8 +155,9 @@ uint8_t **neo_shell_env_export(neo_shell_t *self) {
       continue;
     }
 
-    output[y] = str_cat(env_key,
-                        str_cat((uint8_t *)"=", vector_consume(output_buffer)));
+    output[y] =
+        str_cat(env_key, str_cat((uint8_t *)"=",
+                                 (uint8_t *)vector_consume(output_buffer)));
     y++;
   }
 
