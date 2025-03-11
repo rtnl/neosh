@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <sys/wait.h>
 #include <openssl/sha.h>
+#include <linux/limits.h>
 
 #include <ion.h>
 
@@ -17,6 +18,8 @@
 #endif
 
 typedef t_ion_result_code neo_result_code_t;
+
+typedef struct neo_shell_command_s neo_shell_command_t;
 
 typedef struct nen_map_entry_s {
     uint8_t flag_active;
@@ -33,6 +36,8 @@ typedef struct neo_map_s {
 typedef struct neo_shell_state_s {
     t_ion_buffer *input_buffer;
     neo_map_t *env;
+    uint8_t *dir;
+    neo_shell_command_t **commands;
 } neo_shell_state_t;
 
 typedef struct neo_shell_s {
@@ -46,6 +51,15 @@ typedef struct neo_shell_exec_entry_s {
     uint8_t *path;
     uint8_t **args;
 } neo_shell_exec_entry_t;
+
+typedef struct neo_shell_command_ctx_s {
+    uint8_t **args;
+} neo_shell_command_ctx_t;
+
+struct neo_shell_command_s {
+    uint8_t *key;
+    neo_result_code_t (*run)(neo_shell_command_t *self, neo_shell_t *shell, neo_shell_command_ctx_t *ctx);
+};
 
 // str_ops.c
 size_t str_len(uint8_t *str);
@@ -105,5 +119,12 @@ neo_shell_exec_entry_t *neo_shell_exec_entry_new(uint8_t *path, uint8_t **args);
 void neo_shell_exec_entry_free(neo_shell_exec_entry_t *self);
 neo_result_code_t neo_shell_derive_exec(neo_shell_t *self, uint8_t **input_split, neo_shell_exec_entry_t ***entry_list_ref);
 neo_result_code_t neo_shell_validate_exec(neo_shell_t *self, neo_shell_exec_entry_t *path_entry);
+
+// shell_builtin.c
+neo_shell_command_ctx_t *neo_shell_command_ctx_new(uint8_t **args);
+void neo_shell_command_ctx_free(neo_shell_command_ctx_t *self);
+neo_shell_command_t *neo_shell_command_new(uint8_t *key, neo_result_code_t (*run)(neo_shell_command_t *self, neo_shell_t *shell, neo_shell_command_ctx_t *ctx));
+void neo_shell_command_free(neo_shell_command_t *self);
+neo_result_code_t neo_builtin__change_directory(neo_shell_command_t *self, neo_shell_t *shell, neo_shell_command_ctx_t *ctx);
 
 #endif

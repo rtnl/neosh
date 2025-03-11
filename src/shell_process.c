@@ -9,6 +9,8 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
   size_t exec_list_len;
   neo_shell_exec_entry_t *exec_choice;
   t_ion_object_kind kind;
+  neo_shell_command_t *command_choice;
+  neo_shell_command_ctx_t *command_ctx;
   uint8_t len;
   size_t x;
 
@@ -67,6 +69,32 @@ neo_result_code_t neo_shell_process_input(neo_shell_t *self) {
 
   if (input_split[0] == NULL) {
     free(input_split);
+    free(input);
+    return RESULT_OK;
+  }
+
+  command_choice = NULL;
+  for (x = 0; state->commands[x]; x++) {
+    if (strcmp((char *)input_split[0], (char *)state->commands[x]->key) != 0)
+      continue;
+
+    command_choice = state->commands[x];
+    break;
+  }
+
+  if (command_choice != NULL) {
+    command_ctx = neo_shell_command_ctx_new(input_split);
+
+    result = command_choice->run(command_choice, self, command_ctx);
+    if (result != RESULT_OK) {
+      str_list_free(input_split);
+      free(input);
+      return result;
+    }
+
+    neo_shell_command_ctx_free(command_ctx);
+
+    str_list_free(input_split);
     free(input);
     return RESULT_OK;
   }

@@ -7,10 +7,23 @@ neo_shell_state_t *neo_shell_state_new() {
   self->input_buffer = ion_buffer_new();
   self->env = neo_map_new();
 
+  self->dir = calloc(PATH_MAX, sizeof(uint8_t));
+  self->dir = (uint8_t *)getcwd((char *)self->dir, PATH_MAX);
+  if (self->dir == NULL)
+    push_string_stderr((uint8_t *)"failed at loading current directory");
+
+  self->commands =
+      (neo_shell_command_t **)calloc(2, sizeof(neo_shell_command_t *));
+  self->commands[0] = neo_shell_command_new((uint8_t *)"Change-Directory",
+                                            &neo_builtin__change_directory);
+  self->commands[1] = NULL;
+
   return self;
 }
 
 void neo_shell_state_free(neo_shell_state_t *self) {
+  size_t x;
+
   if (self == NULL)
     return;
 
@@ -19,6 +32,17 @@ void neo_shell_state_free(neo_shell_state_t *self) {
 
   if (self->env != NULL)
     neo_map_free(self->env);
+
+  if (self->dir != NULL)
+    free(self->dir);
+
+  if (self->commands != NULL) {
+    for (x = 0; self->commands[x]; x++) {
+      neo_shell_command_free(self->commands[x]);
+    }
+
+    free(self->commands);
+  }
 
   free(self);
 }
