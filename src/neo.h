@@ -7,7 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdbool.h>
-#include <wait.h>
+#include <sys/wait.h>
 #include <openssl/sha.h>
 
 #include <ion.h>
