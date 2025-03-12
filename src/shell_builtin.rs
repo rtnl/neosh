@@ -21,7 +21,7 @@ impl Command for CommandChangeDirectory {
             None => return Err(Box::from("missing argument")),
         };
 
-        let path = PathBuf::from(ctx.get_arg(0).unwrap());
+        let path = PathBuf::from(arg_0);
 
         match ctx.get_shell().update_path(path) {
             true => {}
