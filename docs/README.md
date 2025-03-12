@@ -31,7 +31,7 @@ experience with features like standard naming, typed data and scripting.
     - [ ] Set-Alias
     - [ ] Start-Timer
     - [ ] Stop-Timer
-    - [ ] Set-Env
+    - [X] Set-Env (set, export)
 
 - [ ] settings
     - [ ] load from file

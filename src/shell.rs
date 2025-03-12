@@ -1,6 +1,7 @@
 use crate::shell_builtin::Command;
 use crate::shell_builtin_cd::CommandChangeDirectory;
 use crate::shell_builtin_exit::CommandExit;
+use crate::shell_builtin_export::CommandExport;
 use crate::shell_state::ShellState;
 use parking_lot::Mutex;
 use slog::Drain;
@@ -33,6 +34,7 @@ impl Shell {
             commands_builtin: vec![
                 Box::new(CommandChangeDirectory::new()),
                 Box::new(CommandExit::new()),
+                Box::new(CommandExport::new()),
             ],
         }
     }
@@ -47,6 +49,12 @@ impl Shell {
         let mut state = self.state.lock();
 
         state.update_path(value)
+    }
+
+    pub fn update_env(&self, key: &str, value: &str) {
+        let mut state = self.state.lock();
+
+        state.update_env(key, value);
     }
 
     pub fn get_envs(&self) -> HashMap<String, String> {

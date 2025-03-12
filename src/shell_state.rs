@@ -38,6 +38,14 @@ impl ShellState {
         }
     }
 
+    pub fn update_env(&mut self, key: &str, value: &str) {
+        if value.is_empty() {
+            self.envs.remove(key);
+        } else {
+            self.envs.insert(key.to_string(), value.to_string());
+        }
+    }
+
     pub fn get_envs(&self) -> &HashMap<String, String> {
         &self.envs
     }
