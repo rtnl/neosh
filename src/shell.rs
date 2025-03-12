@@ -1,5 +1,6 @@
-use crate::shell_buildin_cd::CommandChangeDirectory;
 use crate::shell_builtin::Command;
+use crate::shell_builtin_cd::CommandChangeDirectory;
+use crate::shell_builtin_exit::CommandExit;
 use crate::shell_state::ShellState;
 use parking_lot::Mutex;
 use slog::Drain;
@@ -7,6 +8,7 @@ use slog::{o, Logger};
 use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
+use std::process::exit;
 use std::sync::Arc;
 
 pub struct Shell {
@@ -28,7 +30,10 @@ impl Shell {
 
             state: Arc::new(Mutex::new(ShellState::new())),
 
-            commands_builtin: vec![Box::new(CommandChangeDirectory::new())],
+            commands_builtin: vec![
+                Box::new(CommandChangeDirectory::new()),
+                Box::new(CommandExit::new()),
+            ],
         }
     }
 
@@ -72,6 +77,8 @@ impl Shell {
                 Err(err) => eprintln!("failed at running cycle: {}", err),
             };
         }
+
+        self.shutdown();
     }
 
     async fn run_cycle(&self) -> Result<bool, Box<dyn Error>> {
@@ -84,8 +91,11 @@ impl Shell {
 
         let input_split = input.split_ascii_whitespace().collect::<Vec<_>>();
 
-        self.process_input(input_split).await?;
+        let flag_continue = self.process_input(input_split).await?;
+        Ok(flag_continue)
+    }
 
-        Ok(true)
+    pub fn shutdown(&self) {
+        exit(0);
     }
 }

@@ -15,7 +15,7 @@ impl Command for CommandChangeDirectory {
         vec!["Change-Directory", "cd"]
     }
 
-    fn run(&self, ctx: CommandContext) -> Result<(), Box<dyn Error>> {
+    fn run(&self, ctx: CommandContext) -> Result<bool, Box<dyn Error>> {
         let home = ctx.get_env("HOME").unwrap_or("~".to_string());
         let arg_0 = ctx.get_arg(0).unwrap_or(&home);
 
@@ -28,6 +28,6 @@ impl Command for CommandChangeDirectory {
             }
         }
 
-        Ok(())
+        Ok(true)
     }
 }

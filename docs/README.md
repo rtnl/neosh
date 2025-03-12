@@ -26,8 +26,8 @@ experience with features like standard naming, typed data and scripting.
         - [ ] io control
 
 - [ ] built-in commands
-    - [ ] Exit
-    - [ ] Change-Directory (cd)
+    - [X] Exit
+    - [X] Change-Directory (cd)
     - [ ] Get-Directory (pwd)
     - [ ] Set-Alias
     - [ ] Start-Timer

@@ -5,7 +5,7 @@ use std::error::Error;
 pub trait Command {
     fn get_key(&self) -> Vec<&str>;
 
-    fn run(&self, ctx: CommandContext) -> Result<(), Box<dyn Error>>;
+    fn run(&self, ctx: CommandContext) -> Result<bool, Box<dyn Error>>;
 }
 
 pub struct CommandContext<'a> {
