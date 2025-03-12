@@ -44,7 +44,7 @@ experience with features like standard naming, typed data and scripting.
         - [ ] execute local file
         - [ ] toggle command history
         - [ ] toggle input suggestion
-        - [ ] toggle llm integraion
+        - [ ] toggle llm integration
 
 - [ ] intuitive experience
     - [ ] default programs
