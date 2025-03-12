@@ -38,4 +38,8 @@ impl<'a> CommandContext<'a> {
     pub fn get_arg(&self, index: usize) -> Option<&str> {
         self.args.get(index).cloned()
     }
+
+    pub fn get_env(&self, key: &str) -> Option<String> {
+        self.envs.get(key).cloned()
+    }
 }

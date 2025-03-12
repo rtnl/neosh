@@ -16,10 +16,8 @@ impl Command for CommandChangeDirectory {
     }
 
     fn run(&self, ctx: CommandContext) -> Result<(), Box<dyn Error>> {
-        let arg_0 = match ctx.get_arg(0) {
-            Some(v) => v,
-            None => return Err(Box::from("missing argument")),
-        };
+        let home = ctx.get_env("HOME").unwrap_or("~".to_string());
+        let arg_0 = ctx.get_arg(0).unwrap_or(&home);
 
         let path = PathBuf::from(arg_0);
 
