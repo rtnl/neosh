@@ -1,14 +1,14 @@
-use crate::command::CommandContext;
 use crate::shell::Shell;
+use crate::shell_builtin::CommandContext;
 use is_executable::IsExecutable;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use tokio::process::Command;
 
 impl Shell {
-    pub async fn process_input(&self, input_split: Vec<&str>) -> Result<(), Box<dyn Error>> {
+    pub async fn process_input(&self, input_split: Vec<&str>) -> Result<bool, Box<dyn Error>> {
         if input_split.is_empty() {
-            return Ok(());
+            return Ok(true);
         }
 
         let input_head = input_split.first().unwrap().to_string();
@@ -21,14 +21,13 @@ impl Shell {
                     self.get_envs(),
                 );
 
-                match command.run(ctx) {
-                    Ok(_) => {}
+                return match command.run(ctx) {
+                    Ok(flag_continue) => Ok(flag_continue),
                     Err(err) => {
-                        eprintln!("failed at executing command: {}", err)
+                        eprintln!("failed at executing command: {}", err);
+                        Ok(true)
                     }
                 };
-
-                return Ok(());
             }
             None => {}
         }
@@ -44,7 +43,7 @@ impl Shell {
             Some(value) => value.clone(),
             None => {
                 println!("executable not found");
-                return Ok(());
+                return Ok(true);
             }
         };
 
@@ -58,7 +57,7 @@ impl Shell {
         command.envs(exec_envs);
         command.spawn()?.wait().await?;
 
-        Ok(())
+        Ok(true)
     }
 
     fn process_derive_path(&self, value: &str) -> Vec<Box<Path>> {
