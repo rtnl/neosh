@@ -1,5 +1,5 @@
-use crate::command::Command;
-use crate::shell_builtin::CommandChangeDirectory;
+use crate::shell_buildin_cd::CommandChangeDirectory;
+use crate::shell_builtin::Command;
 use crate::shell_state::ShellState;
 use parking_lot::Mutex;
 use slog::Drain;

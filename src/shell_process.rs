@@ -1,5 +1,5 @@
-use crate::command::CommandContext;
 use crate::shell::Shell;
+use crate::shell_builtin::CommandContext;
 use is_executable::IsExecutable;
 use std::error::Error;
 use std::path::{Path, PathBuf};
