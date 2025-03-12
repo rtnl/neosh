@@ -11,10 +11,10 @@ experience with features like standard naming, typed data and scripting.
         - [ ] execute in background
         - [ ] exit code handling
         - [ ] signal handling
-    - [ ] PATH support
+    - [X] PATH support
         - [X] hardcoded PATH values
-        - [ ] use env
-        - [ ] relative file paths
+        - [X] use env
+        - [X] relative file paths
     - [ ] env support
         - [X] load env on start
         - [X] pass env to programs

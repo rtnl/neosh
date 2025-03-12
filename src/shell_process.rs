@@ -61,7 +61,7 @@ impl Shell {
     }
 
     fn process_derive_path(&self, value: &str) -> Vec<Box<Path>> {
-        let path_list = vec![
+        let path_default = vec![
             "/bin",
             "/sbin",
             "/usr/bin",
@@ -69,6 +69,13 @@ impl Shell {
             "/usr/local/bin",
             "/usr/local/sbin",
         ];
+
+        let envs = self.get_envs();
+
+        let path_list = envs
+            .get("PATH")
+            .map(|it| it.split(":").collect())
+            .unwrap_or(path_default);
 
         let mut path_list: Vec<Box<Path>> = path_list
             .iter()
