@@ -28,7 +28,6 @@ experience with features like standard naming, typed data and scripting.
 - [ ] built-in commands
     - [X] Exit
     - [X] Change-Directory (cd)
-    - [ ] Get-Directory (pwd)
     - [ ] Set-Alias
     - [ ] Start-Timer
     - [ ] Stop-Timer
