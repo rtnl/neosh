@@ -4,10 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-parking_lot = { version = "0.12.3", features = ["serde"] }
 tokio = { version = "1.44.0", features = ["full", "mio"] }
-log = "0.4.26"
 slog = "2.7.0"
-slog-term = { version = "2.9.1", features = ["serde", "serde_json"] }
 slog-async = "2.8.0"
 slog-json = "2.6.1"
+colored = "3.0.0"
+is_executable = "1.0.4"

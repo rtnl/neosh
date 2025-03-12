@@ -1,6 +1,7 @@
 use crate::shell_state::ShellState;
 use slog::Drain;
-use slog::{info, o, Logger};
+use slog::{o, Logger};
+use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
 use tokio::sync::Mutex;
@@ -24,21 +25,38 @@ impl Shell {
         }
     }
 
+    pub async fn get_envs(&self) -> HashMap<String, String> {
+        let state = self.state.lock().await;
+
+        state.get_envs().clone()
+    }
+
     pub async fn run(&self) {
         loop {
             match self.run_cycle().await {
-                Ok(_) => (),
+                Ok(flag_continue) => {
+                    match flag_continue {
+                        false => break,
+                        true => {}
+                    };
+                }
                 Err(err) => eprintln!("failed at running cycle: {}", err),
             };
         }
     }
 
-    async fn run_cycle(&self) -> Result<(), Box<dyn Error>> {
+    async fn run_cycle(&self) -> Result<bool, Box<dyn Error>> {
+        self.io_push_prompt().await?;
+
         let input = self.io_pull_input().await?;
+        if input.is_empty() {
+            return Ok(false);
+        }
+
         let input_split = input.split_ascii_whitespace().collect::<Vec<_>>();
 
-        info!(self.logger, "input_split: {:?}", input_split);
+        self.process_input(input_split).await?;
 
-        Ok(())
+        Ok(true)
     }
 }

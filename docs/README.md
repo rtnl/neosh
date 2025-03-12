@@ -7,20 +7,20 @@ experience with features like standard naming, typed data and scripting.
 
 - [ ] execution experience
     - [ ] program execution
-        - [ ] execute programs
+        - [X] execute programs
         - [ ] execute in background
         - [ ] exit code handling
         - [ ] signal handling
     - [ ] PATH support
-        - [ ] hardcoded PATH values
+        - [X] hardcoded PATH values
         - [ ] use env
         - [ ] relative file paths
     - [ ] env support
-        - [ ] load env on start
-        - [ ] pass env to programs
+        - [X] load env on start
+        - [X] pass env to programs
         - [ ] modify in memory
     - [ ] input handling
-        - [ ] basic args
+        - [X] basic args
         - [ ] multiple commands
         - [ ] file path query
         - [ ] io control
