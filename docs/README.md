@@ -15,10 +15,10 @@ experience with features like standard naming, typed data and scripting.
         - [X] hardcoded PATH values
         - [X] use env
         - [X] relative file paths
-    - [ ] env support
+    - [X] env support
         - [X] load env on start
         - [X] pass env to programs
-        - [ ] modify in memory
+        - [X] modify in memory
     - [ ] input handling
         - [X] basic args
         - [ ] multiple commands
