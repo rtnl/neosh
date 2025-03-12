@@ -10,3 +10,4 @@ slog-async = "2.8.0"
 slog-json = "2.6.1"
 colored = "3.0.0"
 is_executable = "1.0.4"
+parking_lot = { version = "0.12.3", features = ["serde"] }

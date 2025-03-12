@@ -1,12 +1,13 @@
 use crate::command::Command;
 use crate::shell_builtin::CommandChangeDirectory;
 use crate::shell_state::ShellState;
+use parking_lot::Mutex;
 use slog::Drain;
 use slog::{o, Logger};
 use std::collections::HashMap;
 use std::error::Error;
+use std::path::PathBuf;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
 pub struct Shell {
     pub logger: Logger,
@@ -31,8 +32,20 @@ impl Shell {
         }
     }
 
-    pub async fn get_envs(&self) -> HashMap<String, String> {
-        let state = self.state.lock().await;
+    pub fn get_path(&self) -> PathBuf {
+        let state = self.state.lock();
+
+        state.get_path().clone()
+    }
+
+    pub fn update_path(&self, value: PathBuf) -> bool {
+        let mut state = self.state.lock();
+
+        state.update_path(value)
+    }
+
+    pub fn get_envs(&self) -> HashMap<String, String> {
+        let state = self.state.lock();
 
         state.get_envs().clone()
     }

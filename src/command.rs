@@ -30,4 +30,12 @@ impl<'a> CommandContext<'a> {
             envs,
         }
     }
+
+    pub fn get_shell(&self) -> &Shell {
+        self.shell
+    }
+
+    pub fn get_arg(&self, index: usize) -> Option<&str> {
+        self.args.get(index).cloned()
+    }
 }

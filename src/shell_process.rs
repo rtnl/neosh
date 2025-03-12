@@ -1,7 +1,6 @@
 use crate::command::CommandContext;
 use crate::shell::Shell;
 use is_executable::IsExecutable;
-use std::env::current_dir;
 use std::error::Error;
 use std::path::{Path, PathBuf};
 use tokio::process::Command;
@@ -19,10 +18,15 @@ impl Shell {
                     self,
                     input_head.as_str(),
                     input_split[1..].to_vec(),
-                    self.get_envs().await,
+                    self.get_envs(),
                 );
 
-                command.run(ctx)?;
+                match command.run(ctx) {
+                    Ok(_) => {}
+                    Err(err) => {
+                        eprintln!("failed at executing command: {}", err)
+                    }
+                };
 
                 return Ok(());
             }
@@ -46,10 +50,10 @@ impl Shell {
 
         let exec_path = path_choice.as_os_str();
         let exec_args = input_split[1..].to_vec();
-        let exec_envs = self.get_envs().await;
+        let exec_envs = self.get_envs();
 
         let mut command = Command::new(exec_path);
-        command.current_dir(current_dir().unwrap());
+        command.current_dir(self.get_path());
         command.args(exec_args);
         command.envs(exec_envs);
         command.spawn()?.wait().await?;
