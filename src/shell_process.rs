@@ -73,16 +73,17 @@ impl Shell {
         let mut path_list: Vec<Box<Path>> = path_list
             .iter()
             .map(|it| {
-                let mut p = PathBuf::new();
+                let mut p = PathBuf::from(it);
 
-                p.push(it);
-                p.push(value);
+                p = p.join(value);
 
                 Box::from(p.as_path())
             })
             .collect();
 
-        path_list.push(Box::from(Path::new(value)));
+        if value.contains("/") {
+            path_list.push(Box::from(Path::new(value)));
+        }
 
         path_list
     }
