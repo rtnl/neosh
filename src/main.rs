@@ -2,6 +2,7 @@ use crate::shell::Shell;
 
 mod command;
 mod shell;
+mod shell_builtin;
 mod shell_io;
 mod shell_process;
 mod shell_state;

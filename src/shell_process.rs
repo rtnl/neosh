@@ -1,3 +1,4 @@
+use crate::command::CommandContext;
 use crate::shell::Shell;
 use is_executable::IsExecutable;
 use std::env::current_dir;
@@ -12,6 +13,22 @@ impl Shell {
         }
 
         let input_head = input_split.first().unwrap().to_string();
+        match self.find_command(input_head.as_str()) {
+            Some(command) => {
+                let ctx = CommandContext::new(
+                    self,
+                    input_head.as_str(),
+                    input_split[1..].to_vec(),
+                    self.get_envs().await,
+                );
+
+                command.run(ctx)?;
+
+                return Ok(());
+            }
+            None => {}
+        }
+
         let path_list = self.process_derive_path(&input_head);
 
         let path_choice_list = path_list

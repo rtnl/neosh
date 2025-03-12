@@ -1,3 +1,5 @@
+use crate::command::Command;
+use crate::shell_builtin::CommandChangeDirectory;
 use crate::shell_state::ShellState;
 use slog::Drain;
 use slog::{o, Logger};
@@ -10,6 +12,8 @@ pub struct Shell {
     pub logger: Logger,
 
     state: Arc<Mutex<ShellState>>,
+
+    commands_builtin: Vec<Box<dyn Command>>,
 }
 
 impl Shell {
@@ -22,6 +26,8 @@ impl Shell {
             logger,
 
             state: Arc::new(Mutex::new(ShellState::new())),
+
+            commands_builtin: vec![Box::new(CommandChangeDirectory::new())],
         }
     }
 
@@ -29,6 +35,16 @@ impl Shell {
         let state = self.state.lock().await;
 
         state.get_envs().clone()
+    }
+
+    pub fn find_command(&self, key: &str) -> Option<&Box<dyn Command>> {
+        let l: Vec<&Box<dyn Command>> = self
+            .commands_builtin
+            .iter()
+            .filter(|command| command.get_key().contains(&key).clone())
+            .collect();
+
+        l.first().cloned()
     }
 
     pub async fn run(&self) {
