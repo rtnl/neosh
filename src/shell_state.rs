@@ -16,7 +16,7 @@ pub struct ShellState {
     path: PathBuf,
     envs: HashMap<String, String>,
     pub(crate) commands_builtin: Vec<Box<dyn Command>>,
-    background_process: Vec<BackgroundProcess>,
+    background_process: HashMap<Uuid, BackgroundProcess>,
     pub(crate) background_process_completed: Arc<Mutex<VecDeque<Uuid>>>,
 }
 
@@ -36,7 +36,7 @@ impl ShellState {
                 Box::new(CommandExit::new()),
                 Box::new(CommandExport::new()),
             ],
-            background_process: Vec::new(),
+            background_process: HashMap::new(),
             background_process_completed: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
@@ -90,6 +90,10 @@ impl ShellState {
     }
 
     pub fn add_background(&mut self, value: BackgroundProcess) {
-        self.background_process.push(value);
+        self.background_process.insert(value.get_id(), value);
+    }
+
+    pub fn take_background(&mut self, id: Uuid) -> Option<BackgroundProcess> {
+        self.background_process.remove(&id)
     }
 }

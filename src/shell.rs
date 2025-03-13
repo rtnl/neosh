@@ -88,6 +88,33 @@ impl Shell {
         });
     }
 
+    pub async fn get_background_complete(&self) -> Vec<BackgroundProcess> {
+        let mut background_list = vec![];
+        let mut id_list = vec![];
+
+        let mut state = self.state.lock();
+
+        {
+            let mut q = state.background_process_completed.lock();
+
+            loop {
+                match q.pop_front() {
+                    Some(v) => id_list.push(v),
+                    None => break,
+                }
+            }
+        }
+
+        for id in id_list {
+            match state.take_background(id) {
+                Some(v) => background_list.push(v),
+                None => continue,
+            }
+        }
+
+        background_list
+    }
+
     pub async fn run(self: Arc<Self>) {
         loop {
             match self.clone().run_cycle().await {
@@ -105,6 +132,10 @@ impl Shell {
     }
 
     async fn run_cycle(self: Arc<Self>) -> Result<bool, Box<dyn Error>> {
+        for it in self.get_background_complete().await {
+            self.io_push_background_complete(&it).await?
+        }
+
         self.io_push_prompt().await?;
 
         let input = self.io_pull_input().await?;

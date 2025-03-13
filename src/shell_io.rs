@@ -1,3 +1,4 @@
+use crate::background::BackgroundProcess;
 use crate::shell::Shell;
 use colored::Colorize;
 use std::error::Error;
@@ -19,5 +20,22 @@ impl Shell {
         stdin().read_line(&mut input)?;
 
         Ok(input)
+    }
+
+    pub(crate) async fn io_push_background_complete(
+        &self,
+        value: &BackgroundProcess,
+    ) -> Result<(), Box<dyn Error>> {
+        let msg = format!(
+            "completed [id->{}] [pid->{}]",
+            value.get_id(),
+            value.get_child_id()
+        );
+
+        let msg = msg.truecolor(128, 128, 128);
+
+        println!("{}", msg);
+
+        Ok(())
     }
 }
