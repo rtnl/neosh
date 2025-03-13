@@ -1,11 +1,23 @@
-use std::collections::HashMap;
+use crate::background::BackgroundProcess;
+use crate::shell_builtin::{Command, CommandContext};
+use crate::shell_builtin_cd::CommandChangeDirectory;
+use crate::shell_builtin_exit::CommandExit;
+use crate::shell_builtin_export::CommandExport;
+use parking_lot::Mutex;
+use std::collections::{HashMap, VecDeque};
 use std::env;
 use std::env::current_dir;
+use std::error::Error;
 use std::path::PathBuf;
+use std::sync::Arc;
+use uuid::Uuid;
 
 pub struct ShellState {
     path: PathBuf,
     envs: HashMap<String, String>,
+    pub(crate) commands_builtin: Vec<Box<dyn Command>>,
+    background_process: Vec<BackgroundProcess>,
+    pub(crate) background_process_completed: Arc<Mutex<VecDeque<Uuid>>>,
 }
 
 impl ShellState {
@@ -19,6 +31,13 @@ impl ShellState {
         Self {
             path: current_dir().unwrap_or(PathBuf::new()),
             envs,
+            commands_builtin: vec![
+                Box::new(CommandChangeDirectory::new()),
+                Box::new(CommandExit::new()),
+                Box::new(CommandExport::new()),
+            ],
+            background_process: Vec::new(),
+            background_process_completed: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
 
@@ -48,5 +67,29 @@ impl ShellState {
 
     pub fn get_envs(&self) -> &HashMap<String, String> {
         &self.envs
+    }
+
+    pub fn execute_command(
+        &self,
+        key: &str,
+        ctx: CommandContext,
+    ) -> Result<(bool, bool), Box<dyn Error>> {
+        let command = self
+            .commands_builtin
+            .iter()
+            .find(|c| c.get_key().contains(&key));
+
+        match command {
+            Some(command) => {
+                let flag_continue = command.run(ctx)?;
+
+                Ok((flag_continue, true))
+            }
+            None => Ok((true, false)),
+        }
+    }
+
+    pub fn add_background(&mut self, value: BackgroundProcess) {
+        self.background_process.push(value);
     }
 }

@@ -1,5 +1,7 @@
 use crate::shell::Shell;
+use std::sync::Arc;
 
+mod background;
 mod command;
 mod shell;
 mod shell_builtin;
@@ -12,7 +14,7 @@ mod shell_state;
 
 #[tokio::main]
 async fn main() {
-    let shell = Shell::new();
+    let shell = Arc::new(Shell::new());
 
     shell.run().await;
 }

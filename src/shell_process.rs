@@ -3,34 +3,42 @@ use crate::shell_builtin::CommandContext;
 use is_executable::IsExecutable;
 use std::error::Error;
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 use tokio::process::Command;
 
 impl Shell {
-    pub async fn process_input(&self, input_split: Vec<&str>) -> Result<bool, Box<dyn Error>> {
+    pub async fn process_input(
+        self: Arc<Self>,
+        input_split: Vec<&str>,
+    ) -> Result<bool, Box<dyn Error>> {
+        let mut input_split = input_split.clone();
+
         if input_split.is_empty() {
             return Ok(true);
         }
 
-        let input_head = input_split.first().unwrap().to_string();
-        match self.find_command(input_head.as_str()) {
-            Some(command) => {
-                let ctx = CommandContext::new(
-                    self,
-                    input_head.as_str(),
-                    input_split[1..].to_vec(),
-                    self.get_envs(),
-                );
+        let flag_background = if input_split.last().cloned().unwrap_or("") == "&" {
+            input_split.pop();
+            true
+        } else {
+            false
+        };
 
-                return match command.run(ctx) {
-                    Ok(flag_continue) => Ok(flag_continue),
-                    Err(err) => {
-                        eprintln!("failed at executing command: {}", err);
-                        Ok(true)
-                    }
-                };
-            }
-            None => {}
-        }
+        let input_head = input_split.first().unwrap().to_string();
+
+        let command_ctx = CommandContext::new(
+            self.clone(),
+            input_head.as_str(),
+            input_split[1..].to_vec(),
+            self.get_envs(),
+        );
+        let (flag_continue, command_found) = self
+            .clone()
+            .execute_command(input_head.as_str(), command_ctx)?;
+        match command_found {
+            true => return Ok(flag_continue),
+            false => {}
+        };
 
         let path_list = self.process_derive_path(&input_head);
 
@@ -55,7 +63,13 @@ impl Shell {
         command.current_dir(self.get_path());
         command.args(exec_args);
         command.envs(exec_envs);
-        command.spawn()?.wait().await?;
+
+        let mut child = command.spawn()?;
+        if flag_background {
+            self.run_background(child).await;
+        } else {
+            child.wait().await?;
+        }
 
         Ok(true)
     }

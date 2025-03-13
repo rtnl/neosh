@@ -8,7 +8,7 @@ experience with features like standard naming, typed data and scripting.
 - [ ] execution experience
     - [ ] program execution
         - [X] execute programs
-        - [ ] execute in background
+        - [X] execute in background
         - [ ] exit code handling
         - [ ] signal handling
     - [X] PATH support

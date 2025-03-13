@@ -1,6 +1,7 @@
 use crate::shell::Shell;
 use std::collections::HashMap;
 use std::error::Error;
+use std::sync::Arc;
 
 pub trait Command {
     fn get_key(&self) -> Vec<&str>;
@@ -9,7 +10,7 @@ pub trait Command {
 }
 
 pub struct CommandContext<'a> {
-    shell: &'a Shell,
+    shell: Arc<Shell>,
 
     name: String,
     args: Vec<&'a str>,
@@ -18,7 +19,7 @@ pub struct CommandContext<'a> {
 
 impl<'a> CommandContext<'a> {
     pub fn new(
-        shell: &'a Shell,
+        shell: Arc<Shell>,
         name: &str,
         args: Vec<&'a str>,
         envs: HashMap<String, String>,
@@ -32,7 +33,7 @@ impl<'a> CommandContext<'a> {
     }
 
     pub fn get_shell(&self) -> &Shell {
-        self.shell
+        &self.shell
     }
 
     pub fn get_arg(&self, index: usize) -> Option<&str> {

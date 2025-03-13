@@ -1,7 +1,5 @@
-use crate::shell_builtin::Command;
-use crate::shell_builtin_cd::CommandChangeDirectory;
-use crate::shell_builtin_exit::CommandExit;
-use crate::shell_builtin_export::CommandExport;
+use crate::background::BackgroundProcess;
+use crate::shell_builtin::CommandContext;
 use crate::shell_state::ShellState;
 use parking_lot::Mutex;
 use slog::Drain;
@@ -11,13 +9,12 @@ use std::error::Error;
 use std::path::PathBuf;
 use std::process::exit;
 use std::sync::Arc;
+use tokio::process::Child;
 
 pub struct Shell {
     pub logger: Logger,
 
     state: Arc<Mutex<ShellState>>,
-
-    commands_builtin: Vec<Box<dyn Command>>,
 }
 
 impl Shell {
@@ -30,12 +27,6 @@ impl Shell {
             logger,
 
             state: Arc::new(Mutex::new(ShellState::new())),
-
-            commands_builtin: vec![
-                Box::new(CommandChangeDirectory::new()),
-                Box::new(CommandExit::new()),
-                Box::new(CommandExport::new()),
-            ],
         }
     }
 
@@ -63,19 +54,43 @@ impl Shell {
         state.get_envs().clone()
     }
 
-    pub fn find_command(&self, key: &str) -> Option<&Box<dyn Command>> {
-        let l: Vec<&Box<dyn Command>> = self
-            .commands_builtin
-            .iter()
-            .filter(|command| command.get_key().contains(&key).clone())
-            .collect();
+    pub fn execute_command(
+        self: Arc<Self>,
+        key: &str,
+        ctx: CommandContext,
+    ) -> Result<(bool, bool), Box<dyn Error>> {
+        let state = self.state.lock();
 
-        l.first().cloned()
+        state.execute_command(key, ctx)
     }
 
-    pub async fn run(&self) {
+    pub fn add_background(&self, value: BackgroundProcess) {
+        let mut state = self.state.lock();
+
+        state.add_background(value)
+    }
+
+    pub async fn run_background(self: Arc<Self>, mut child: Child) {
+        let value = BackgroundProcess::new(child.id().unwrap_or(0));
+        let value_id = value.get_id();
+
+        self.add_background(value);
+
+        let state = self.state.lock();
+        let completed = state.background_process_completed.clone();
+
+        tokio::spawn(async move {
+            child.wait().await.unwrap();
+
+            let mut c = completed.lock();
+
+            c.push_back(value_id);
+        });
+    }
+
+    pub async fn run(self: Arc<Self>) {
         loop {
-            match self.run_cycle().await {
+            match self.clone().run_cycle().await {
                 Ok(flag_continue) => {
                     match flag_continue {
                         false => break,
@@ -89,7 +104,7 @@ impl Shell {
         self.shutdown();
     }
 
-    async fn run_cycle(&self) -> Result<bool, Box<dyn Error>> {
+    async fn run_cycle(self: Arc<Self>) -> Result<bool, Box<dyn Error>> {
         self.io_push_prompt().await?;
 
         let input = self.io_pull_input().await?;
